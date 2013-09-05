@@ -97,7 +97,7 @@ class ConsoleLogger(logging.StreamHandler):
             msg = msg.rstrip()
             fs = "%s"
         stream = self.stream
-        if record.levelno in [ERROR, CRITICAL, FATAL]:
+        if record.levelno in [WARN, ERROR, CRITICAL, FATAL]:
             stream = self.error_stream
         if not hasattr(types, "UnicodeType"):
              # if no unicode support...
@@ -167,7 +167,6 @@ def configure_sc_logging(use_syslog=False):
         syslog_handler.setFormatter(formatter)
         syslog_handler.setLevel(logging.DEBUG)
         log.addHandler(syslog_handler)
-
 
 def configure_ssh_logging():
     """

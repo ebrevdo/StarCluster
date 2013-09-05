@@ -43,15 +43,47 @@ from starcluster import exception
 from starcluster.logger import log
 
 
-def ipy_shell(local_ns=None):
+def ipy_shell(local_ns=None, simple=False):
+    """
+    Creates an ipython shell.  If simple == True, then the shell
+    is very basic (no colors, no prompts) and an exception will cause
+    the entire process to exit with error code 1.
+    """
     try:
         import IPython
         if IPython.__version__ < '0.11':
             from IPython.Shell import IPShellEmbed
+            if simple:
+                log.error('Option simple is not supported with IPython version < 0.11')
+                return
             return IPShellEmbed(argv=[])(local_ns)
         else:
             from IPython import embed
-            return embed(user_ns=local_ns)
+            cfg = None
+            if simple:
+                from IPython.config.loader import Config
+                cfg = Config()
+                prompt = cfg.PromptManager
+                prompt.in_template = ''
+                prompt.in2_template = ''
+                prompt.out_template = ''
+                tis = cfg.TerminalInteractiveShell
+                tis.colors = 'NoColor'
+                tis.confirm_exit = False
+                tis.display_banner = ''
+                tis.banner1 = ''
+                tis.banner2 = ''
+                def exit_error(self, etype, value, tb, tb_offset=None):
+                    log.error(value)
+                    self.reset(new_session=False)
+                    self.register_post_execute(lambda: sys.exit(1))
+                custom_exceptions = ((Exception,), exit_error)
+                return embed(user_ns=local_ns,
+                             config=cfg,
+                             custom_exceptions=custom_exceptions)
+            else:
+                return embed(user_ns=local_ns)
+
     except ImportError as e:
         log.error("Unable to load IPython:\n\n%s\n" % e)
         log.error("Please check that IPython is installed and working.")

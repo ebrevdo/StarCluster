@@ -98,6 +98,9 @@ class CmdShell(CmdBase):
                           action="store", type="string", default=None,
                           metavar="CLUSTER", help="configure a parallel "
                           "IPython session on CLUSTER")
+        parser.add_option("-s", "--simple", dest="simple",
+                          action="store_true", default=False,
+                          metavar="SIMPLE", help="simple (silent) interface")
 
     def execute(self, args):
         local_ns = dict(cfg=self.cfg, ec2=self.ec2, s3=self.s3, cm=self.cm,
@@ -142,16 +145,18 @@ class CmdShell(CmdBase):
             local_ns['ipcluster'] = cl
             local_ns['ipclient'] = rc
             local_ns['ipview'] = rc[:]
+
         modules = [(starcluster.__name__ + '.' + module, module)
                    for module in starcluster.__all__]
         modules += [('boto', 'boto'), ('paramiko', 'paramiko'),
                     ('workerpool', 'workerpool'), ('jinja2', 'jinja2'),
                     ('pyasn1', 'pyasn1'), ('iptools', 'iptools')]
         for fullname, modname in modules:
-            log.info('Importing module %s' % modname)
+            if not self.opts.simple:
+                log.info('Importing module %s' % modname)
             try:
                 __import__(fullname)
                 local_ns[modname] = sys.modules[fullname]
             except ImportError, e:
                 log.error("Error loading module %s: %s" % (modname, e))
-        utils.ipy_shell(local_ns=local_ns)
+        embedded = utils.ipy_shell(local_ns=local_ns, simple=self.opts.simple)
