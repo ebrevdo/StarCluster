@@ -611,8 +611,11 @@ class SSHClient(object):
         """Returns the remote machine's environment as a dictionary"""
         env = {}
         for line in self.execute('env'):
-            key, val = line.split('=', 1)
-            env[key] = val
+            try:
+                key, val = line.split('=', 1)
+                env[key] = val
+            except ValueError, e:
+                log.warn("get_env could not parse line: %s" % line)
         return env
 
     def close(self):
