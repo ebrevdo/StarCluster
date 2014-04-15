@@ -90,6 +90,9 @@ class CmdAddNode(ClusterCompleter):
             "-z", "--availability-zone", dest="zone", action="store",
             type="string", default=None, help="availability zone for "
             "new node(s) (e.g. us-east-1)")
+        parser.add_option("--instance-profile-name", dest="instance_profile_name",
+                          action="store", type="string",
+                          help=("instance profile name (role) for these node(s)"))
         parser.add_option(
             "-b", "--bid", dest="spot_bid", action="store", type="float",
             default=None, help="spot bid for new node(s) (in $ per hour)")
@@ -125,4 +128,5 @@ class CmdAddNode(ClusterCompleter):
                           image_id=self.opts.image_id,
                           instance_type=self.opts.instance_type,
                           zone=self.opts.zone, spot_bid=self.opts.spot_bid,
-                          no_create=self.opts.no_create)
+                          no_create=self.opts.no_create,
+                          instance_profile_name=self.opts.instance_profile_name)

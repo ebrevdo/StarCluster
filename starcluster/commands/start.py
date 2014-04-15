@@ -180,6 +180,9 @@ class CmdStart(ClusterCompleter):
         parser.add_option("-N", "--subnet-id", dest="subnet_id",
                           action="store", type="string",
                           help=("Launch cluster into a VPC subnet"))
+        parser.add_option("--instance-profile-name", dest="instance_profile_name",
+                          action="store", type="string",
+                          help=("Instance profile name (EC2 role) for cluster nodes"))
 
     def execute(self, args):
         if len(args) != 1:

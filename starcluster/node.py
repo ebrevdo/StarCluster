@@ -336,6 +336,20 @@ class Node(object):
         return self.instance.subnet_id
 
     @property
+    def instance_profile(self):
+        return self.instance.instance_profile
+
+    @property
+    def instance_profile_name(self):
+        profile = self.instance_profile
+        arn = profile.get('arn') if profile is not None else None
+        if arn is not None:
+            ix = arn.find('instance-profile/')
+            return arn[ix+17:] if ix > -1 else None
+        else:
+            return None
+
+    @property
     def root_device_name(self):
         root_dev = self.instance.root_device_name
         bmap = self.block_device_mapping
